@@ -1,16 +1,10 @@
+@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #0f172a; /* Hizaki Dark Navy */
-  --foreground: #f8fafc; /* Off-white text */
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    @apply bg-[#0f172a] text-slate-200 antialiased;
+  }
 }

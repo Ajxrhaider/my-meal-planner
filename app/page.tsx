@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, RefreshCw, Trash2, ChefHat, Sparkles, AlertTriangle } from "lucide-react";
+import { Trash2, Sparkles, AlertTriangle, RefreshCw, ChefHat } from "lucide-react";
 
 export default function Home() {
   const [ingredients, setIngredients] = useState("");
@@ -13,8 +13,7 @@ export default function Home() {
     if (!ingredients.trim()) return;
     setLoading(true);
     setError("");
-    setMealPlan(null);
-
+    
     try {
       const res = await fetch("/api/meal-plan", {
         method: "POST",
@@ -26,96 +25,91 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Failed to generate");
       setMealPlan(data);
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || "Connection to Groq failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 p-6 md:p-12 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <main className="min-h-screen bg-[#0f172a] text-slate-100 p-8 font-sans">
+      <div className="max-w-3xl mx-auto space-y-10">
         
-        {/* HEADER */}
-        <header className="space-y-2 border-l-4 border-indigo-500 pl-4">
-          <div className="flex items-center gap-2 text-indigo-400">
-            <ChefHat className="w-6 h-6" />
-            <span className="uppercase tracking-widest text-xs font-bold">Hizaki Labs System</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold font-space text-white tracking-tight">
-            MealGen AI
+        {/* BRANDING HEADER */}
+        <div className="border-l-4 border-indigo-500 pl-6 py-2">
+          <h1 className="text-5xl font-black tracking-tighter text-white mb-2 italic">
+            MEALGEN <span className="text-indigo-500 not-italic">AI</span>
           </h1>
-          <p className="text-slate-400 max-w-xl">
-            Leveraging Groq Llama-3 to transform pantry items into a professional 7-day nutritional plan.
-          </p>
-        </header>
+          <p className="text-slate-400 font-medium tracking-wide uppercase text-xs">Hizaki Labs System Protocol v1.0</p>
+        </div>
 
-        {/* INPUT SECTION */}
-        <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 shadow-xl backdrop-blur-sm">
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Input Ingredients (comma separated)
-          </label>
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
-              placeholder="e.g. Rice, Chicken, Eggs, Spinach..."
-              className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            />
-            <div className="flex gap-2">
+        {/* INPUT BOX */}
+        <div className="bg-slate-800/40 border border-slate-700 p-8 rounded-2xl shadow-2xl backdrop-blur-md">
+          <div className="flex flex-col gap-6">
+            <div className="space-y-2">
+              <label className="text-xs uppercase tracking-widest font-bold text-indigo-400">Pantry Inventory</label>
+              <textarea
+                value={ingredients}
+                onChange={(e) => setIngredients(e.target.value)}
+                placeholder="e.g. Chicken breast, brown rice, broccoli..."
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-indigo-500 outline-none min-h-[120px] transition-all"
+              />
+            </div>
+            
+            <div className="flex gap-4">
               <button
                 onClick={generateMealPlan}
                 disabled={loading}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                {loading ? "Processing..." : "Initialize"}
+                {loading ? "PROCESSING PROTOCOL..." : "INITIALIZE GENERATION"}
               </button>
               <button
-                onClick={() => setIngredients("")}
-                className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-3 rounded-lg transition-colors"
+                onClick={() => { setIngredients(""); setMealPlan(null); }}
+                className="px-6 bg-slate-700 hover:bg-slate-600 rounded-xl transition-all active:scale-95"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-5 h-5 text-slate-300" />
               </button>
             </div>
           </div>
-          
-          {error && (
-            <div className="mt-4 p-4 bg-red-900/20 border border-red-500/50 text-red-200 rounded-lg flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
-              {error}
-            </div>
-          )}
         </div>
 
-        {/* RESULTS SECTION */}
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 p-4 rounded-xl text-red-200 flex items-center gap-3 animate-pulse">
+            <AlertTriangle className="w-5 h-5 text-red-500" /> {error}
+          </div>
+        )}
+
+        {/* RESULTS DISPLAY */}
         {mealPlan && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white font-space">Generated Protocol</h2>
-              <span className="text-xs font-mono text-indigo-400 bg-indigo-900/30 px-2 py-1 rounded">
-                STATUS: COMPLETE
-              </span>
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+               <div className="h-[1px] flex-1 bg-slate-800"></div>
+               <p className="text-indigo-400 font-mono text-xs font-bold tracking-[0.2em]">OUTPUT DATA RECEIVED</p>
+               <div className="h-[1px] flex-1 bg-slate-800"></div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               {mealPlan.schedule?.map((day: any, i: number) => (
-                <div key={i} className="bg-slate-800 border border-slate-700 p-5 rounded-xl hover:border-indigo-500/50 transition-colors group">
-                  <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-                    <h3 className="font-bold text-lg text-indigo-300">{day.day}</h3>
-                    <ChefHat className="w-4 h-4 text-slate-500 group-hover:text-indigo-500 transition-colors" />
-                  </div>
-                  <div className="space-y-4 text-sm">
-                    {['breakfast', 'lunch', 'dinner'].map((meal) => (
-                      <div key={meal}>
-                        <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
-                          {meal}
-                        </span>
-                        <p className="font-medium text-slate-200">
-                          {day[meal]?.name || "Leftovers / Open"}
-                        </p>
-                      </div>
-                    ))}
+                <div key={i} className="bg-slate-800/60 border border-slate-700 p-6 rounded-xl">
+                  <h3 className="text-indigo-400 font-bold mb-4 flex items-center gap-2">
+                    <ChefHat className="w-4 h-4" /> {day.day}
+                  </h3>
+                  <div className="grid sm:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-slate-500 font-bold text-[10px] uppercase">Breakfast</p>
+                      <p className="text-slate-200">{day.breakfast?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 font-bold text-[10px] uppercase">Lunch</p>
+                      <p className="text-slate-200">{day.lunch?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-500 font-bold text-[10px] uppercase">Dinner</p>
+                      <p className="text-slate-200">{day.dinner?.name}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -123,8 +117,8 @@ export default function Home() {
           </div>
         )}
 
-        <footer className="text-center text-slate-600 text-sm py-8 border-t border-slate-800">
-          © {new Date().getFullYear()} Hizaki Labs. Built for efficiency.
+        <footer className="text-center text-slate-600 text-[10px] uppercase tracking-[0.3em] py-12">
+          © 2026 Hizaki Labs. All Systems Operational.
         </footer>
       </div>
     </main>
