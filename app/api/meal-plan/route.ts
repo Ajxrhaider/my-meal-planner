@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { groq } from '@/lib/groq'; // Adjust the path based on where you saved it
+import { groq } from '@/lib/groq'; 
 
 export async function POST(req: Request) {
   try {
@@ -9,23 +9,20 @@ export async function POST(req: Request) {
       messages: [
         { 
           role: "system", 
-          content: "Return ONLY a JSON object with a 'schedule' array for 7 days." 
+          content: "Return ONLY a JSON object. Structure: { \"schedule\": [ { \"day\": \"Monday\", \"breakfast\": { \"name\": \"\" }, \"lunch\": { \"name\": \"\" }, \"dinner\": { \"name\": \"\" } } ] }" 
         },
-        { role: "user", content: ingredients }
+        { role: "user", content: `Ingredients: ${ingredients}` }
       ],
-      model: "llama3-8b-8192",
-      response_format: { type: "json_object" }
+      // UPDATED TO MATCH YOUR KEY LIST
+      model: "llama-3.1-8b-instant", 
+      response_format: { type: "json_object" },
+      temperature: 0.1, // Low temperature for consistent JSON
     });
 
     const responseContent = completion.choices[0]?.message?.content;
-    
-    if (!responseContent) {
-        throw new Error("No content received from Groq");
-    }
-
-    return NextResponse.json(JSON.parse(responseContent));
+    return NextResponse.json(JSON.parse(responseContent || "{}"));
   } catch (error) {
-    console.error("Groq API Route Error:", error);
-    return NextResponse.json({ error: "Failed to generate meal plan" }, { status: 500 });
+    console.error("Groq Error:", error);
+    return NextResponse.json({ error: "Protocol Error: Model mismatch or limit reached." }, { status: 500 });
   }
 }
